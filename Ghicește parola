@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ghicește Codul</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .hidden { display: none; }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #2563eb;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    input {
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      width: 200px;
+    }
+    .section {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 Ghicește Codul</h1>
+
+  <!-- Ecran Start -->
+  <div id="startScreen" class="section">
+    <button id="playBtn">Play</button>
+  </div>
+
+  <!-- Ecran Alegere Lungime -->
+  <div id="lengthScreen" class="section hidden">
+    <h2>Alege lungimea codului</h2>
+    <button class="lengthBtn" data-length="3">3 caractere</button>
+    <button class="lengthBtn" data-length="4">4 caractere</button>
+    <button class="lengthBtn" data-length="6">6 caractere</button>
+  </div>
+
+  <!-- Ecran Introdu Codul -->
+  <div id="codeInputScreen" class="section hidden">
+    <h2>Introdu codul secret</h2>
+    <input type="text" id="secretCodeInput" placeholder="ex: a1B3xZ" maxlength="6">
+    <div><button id="startGuessingBtn">Start</button></div>
+  </div>
+
+  <!-- Ecran Progres -->
+  <div id="progressScreen" class="section hidden">
+    <h2>🔍 Se ghicește codul...</h2>
+    <p id="currentGuess">Începe...</p>
+  </div>
+
+  <!-- Ecran Rezultat -->
+  <div id="resultScreen" class="section hidden">
+    <h2>✅ Cod ghicit!</h2>
+    <p id="resultDetails"></p>
+    <button id="replayBtn">Replay</button>
+    <button id="homeBtn">Home</button>
+  </div>
+
+  <script>
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let codeLength = 4;
+    let secretCode = "";
+    let attempts = 0;
+    let startTime;
+
+    const startScreen = document.getElementById("startScreen");
+    const lengthScreen = document.getElementById("lengthScreen");
+    const codeInputScreen = document.getElementById("codeInputScreen");
+    const progressScreen = document.getElementById("progressScreen");
+    const resultScreen = document.getElementById("resultScreen");
+
+    document.getElementById("playBtn").onclick = () => {
+      startScreen.classList.add("hidden");
+      lengthScreen.classList.remove("hidden");
+    };
+
+    document.querySelectorAll(".lengthBtn").forEach(btn => {
+      btn.onclick = () => {
+        codeLength = parseInt(btn.dataset.length);
+        lengthScreen.classList.add("hidden");
+        codeInputScreen.classList.remove("hidden");
+        document.getElementById("secretCodeInput").value = "";
+        document.getElementById("secretCodeInput").maxLength = codeLength;
+      };
+    });
+
+    document.getElementById("startGuessingBtn").onclick = () => {
+      const input = document.getElementById("secretCodeInput").value.trim();
+      if (input.length !== codeLength) {
+        alert(`Codul trebuie să aibă exact ${codeLength} caractere.`);
+        return;
+      }
+      secretCode = input;
+      codeInputScreen.classList.add("hidden");
+      progressScreen.classList.remove("hidden");
+      startGuessing();
+    };
+
+    function startGuessing() {
+      attempts = 0;
+      startTime = Date.now();
+      let current = "";
+
+      const interval = setInterval(() => {
+        current = "";
+        for (let i = 0; i < codeLength; i++) {
+          current += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        attempts++;
+        document.getElementById("currentGuess").textContent = `Încercare #${attempts}: ${current}`;
+        if (current === secretCode) {
+          clearInterval(interval);
+          showResult();
+        }
+      }, 5);
+    }
+
+    function showResult() {
+      progressScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      const time = ((Date.now() - startTime) / 1000).toFixed(2);
+      document.getElementById("resultDetails").innerHTML = `
+        Codul <strong>${secretCode}</strong> a fost ghicit în <strong>${attempts}</strong> încercări<br>
+        Timp: <strong>${time}</strong> secunde
+      `;
+    }
+
+    document.getElementById("replayBtn").onclick = () => {
+      resultScreen.classList.add("hidden");
+      lengthScreen.classList.remove("hidden");
+    };
+
+    document.getElementById("homeBtn").onclick = () => {
+      resultScreen.classList.add("hidden");
+      startScreen.classList.remove("hidden");
+    };
+  </script>
+</body>
+</html>
